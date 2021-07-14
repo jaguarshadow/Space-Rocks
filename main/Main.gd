@@ -75,6 +75,7 @@ func _process(delta):
 		
 func game_over():
 	$Music.stop()
+	emit_signal("gameover")
 	playing = false
 	$HUD.game_over()
 

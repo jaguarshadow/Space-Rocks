@@ -28,18 +28,18 @@ func _ready():
 func change_state(new_state):
 	match new_state:
 		INIT:
-			$CollisionShape2D.disabled = true
+			$CollisionShape2D.set_deferred("disabled", true)
 			$Sprite.modulate.a = 0.5
 		ALIVE:
-			$CollisionShape2D.disabled = false
+			$CollisionShape2D.set_deferred("disabled", false)
 			$Sprite.modulate.a = 1.0
 		INVULNERABLE:
-			$CollisionShape2D.disabled = true
+			$CollisionShape2D.set_deferred("disabled", true)
 			$Sprite.modulate.a = 0.5
 			$InvulnerabilityTimer.start()
 		DEAD:
 			$EngineSound.stop()
-			$CollisionShape2D.disabled = true
+			$CollisionShape2D.set_deferred("disabled", true)
 			$Sprite.hide()
 			linear_velocity = Vector2()
 			emit_signal("dead")
@@ -104,6 +104,8 @@ func set_lives(value):
 	lives = value
 	emit_signal("lives_changed", lives)
 	self.shield = max_shield
+	if lives <= 0:
+		change_state(DEAD)
 	
 func start():
 	$Sprite.show()
@@ -123,10 +125,8 @@ func _on_Player_body_entered(body):
 		$ExplodeSound.play()
 		$Explosion.show()
 		$Explosion/AnimationPlayer.play("explosion")
-		self.shield -= body.size * 10
-		if lives < 0 and self.shield <= 0:
-			change_state(DEAD)
-		else:
+		self.shield -= body.size * 25
+		if lives > 0:
 			change_state(INVULNERABLE)
 			
 func set_shield(value):
@@ -136,4 +136,3 @@ func set_shield(value):
 	emit_signal("shield_changed", shield/max_shield * 100)
 	if shield <= 0:
 		self.lives -= 1
-		
